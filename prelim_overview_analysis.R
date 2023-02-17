@@ -3,13 +3,65 @@
  library(readxl)
  library(googlesheets4)
  library(glue)
+ library(openxlsx)
+ purrr::map(list.files("R/",full.names = T),~source(.x))
  ks <- read_sheet(ss = Sys.getenv("SYR_EQUAKE_GS_URL"),sheet = "survey")
  kc <- read_sheet(ss = Sys.getenv("SYR_EQUAKE_GS_URL"),sheet = "choices")
  dat_fp <- file.path(Sys.getenv("SYR_EQUAKE_DIR"),"kobo_data_incoming","Syria_earthquake_-_shelters_multi-sectoral_assessment_-_latest_version_-_False_-_2023-02-17-07-19-17.xlsx")
  dat <- read_excel(dat_fp)
  
+ dat %>% select(ends_with("tot\\d"))
  # label data
- dat_labelled <- label_dataset(dat, ks = ks, kc = kc)
+ dat_labelled <- label_dataset(dat, ks = ks, kc = kc) %>% 
+     clean_up_composite()
+ 
+ dat_labelled %>% 
+     glimpse()
+ 
+ 
+ dat_labelled %>% 
+     glimpse()
+ dat_labelled_hh_estimate <- dat_labelled%>% 
+     mutate(
+         max_hh_num= as.numeric(max_hh_txt),.after=max_hh_txt
+         )
+ 
+ 
+ indiv_demo_nums <- c("total_infants_0_6_mo_num",
+                        "total_ealy_childhood_1_4_num",
+                        "total_children_3_6_num",
+                        "total_children_17_18_num",
+                        "total_adults_19_16_num",
+                        "total_elders_60_num")
+ dat_labelled_hh_estimate <- dat_labelled_hh_estimate %>% 
+     mutate(
+         hh_best_estimate_num = case_when(
+             !is.na(likely_hh_num)~likely_hh_num,
+             !is.na(min_hh_num) & !is.na(max_hh_num)~ ceiling(rowMeans(dat_labelled_hh_estimate[, c("min_hh_num", "max_hh_num")], na.rm = TRUE)),
+             TRUE ~NA_real_
+             
+         ),.after=max_hh_num,
+         
+     ) %>% 
+     # select(-all_of(c("max_hh_num", "min_hh_num","likely_hh_num","max_hh_txt")))  %>% 
+     mutate(
+         mutate(
+             across(indiv_demo_nums,~as.numeric(.x))) %>% select(indiv_demo_nums)
+     )
+ 
+ # install.packages("openxlsx")
+ dat_labelled_hh_estimate %>% 
+     mutate(
+        total_indiv= rowSums(dat_labelled_hh_estimate[,indiv_demo_nums],na.rm=T),
+        .after=total_elders_60_num
+    ) %>% select(-contains("address")) %>% 
+     openxlsx::write.xlsx("syr_equake_assessment_data_clean_202230217.xlsx",na="")
+ 
+ceiling(1.5)
+
+ 
+  
+ 
  
  
  # For preliminary analysis we are going to pretend data is at shelter level... and
@@ -26,18 +78,20 @@
      group_by(admin_1_so,admin_2_so,admin_3_so,shelter_name_txt) %>%
      slice(1) %>% 
      ungroup() %>% 
-     pivot_longer(-c("admin_1_so","admin_2_so","admin_3_so","shelter_name_txt")) %>% 
+     select(-all_of(c("admin_1_so","admin_2_so","admin_3_so","shelter_name_txt"))) %>% 
+     pivot_longer(cols = everything()) %>% 
+     # pivot_longer(-c("admin_1_so","admin_2_so","admin_3_so","shelter_name_txt")) %>% 
      filter(!is.na(value)) %>% 
-     group_by(admin_1_so,admin_2_so,admin_3_so,name,value) %>% 
+     group_by(name,value) %>% 
      summarise(
          n=n(),.groups = "drop_last"
      ) %>% 
-     arrange(admin_1_so,admin_2_so, admin_3_so,name,value) %>% 
+     arrange(name,value) %>% 
      mutate(
          pct=n/sum(n)
      ) %>% 
      ungroup() %>% 
-     arrange(admin_1_so,admin_2_so, admin_3_so,name,value) %>% 
+     arrange(name,value) %>% 
      mutate(
          type="select_one"
      )
@@ -95,5 +149,11 @@
      
   adm3_num_analyzed_na_rm %>% 
       print(n=nrow(.))
+  
+  
+  # total number of people who have recieved assistance
+  
+  dat_labelled %>% select(ends_with("_num")) %>% View()
+  
  
  
