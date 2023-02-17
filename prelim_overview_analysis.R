@@ -7,11 +7,18 @@
  kc <- read_sheet(ss = Sys.getenv("SYR_EQUAKE_GS_URL"),sheet = "choices")
  dat_fp <- file.path(Sys.getenv("SYR_EQUAKE_DIR"),"kobo_data_incoming","Syria_earthquake_-_shelters_multi-sectoral_assessment_-_latest_version_-_False_-_2023-02-17-07-19-17.xlsx")
  dat <- read_excel(dat_fp)
+ 
+ # label data
  dat_labelled <- label_dataset(dat, ks = ks, kc = kc)
  
  
- # select one pcts
+ # For preliminary analysis we are going to pretend data is at shelter level... and
+ # at least make it sort of true  group_by()->slice(1)
+ # in final analysis would need to aggregate to settlement prior to these calculations
  
+ 
+ 
+ # select one pcts
  adm3_so_analyzed_na_rm <- dat_labelled %>% 
      select(shelter_name_txt,ends_with("_so")) %>% 
      # not sure what will happen with shelters so we can do something like this:
