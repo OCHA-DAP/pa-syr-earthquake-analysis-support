@@ -102,7 +102,7 @@ label_dataset <- function(df, ks,kc){
         )
     
     return(data_all_renamed %>% 
-        select(matches("*_sm_*|_sm$|so$|_num$|_pct$")) 
+        select(matches("*_sm_*|_sm$|so$|_num$|_pct$|_txt$")) 
     )
     
     

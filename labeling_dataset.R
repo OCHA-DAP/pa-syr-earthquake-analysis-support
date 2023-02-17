@@ -89,6 +89,6 @@ data_all_renamed <- dat_sm_renamed %>%
     )
 
 data_renamed_clean <- data_all_renamed %>% 
-    select(matches("*_sm_*|_sm$|so$|_num$|_pct$")) 
+    select(matches("*_sm_*|_sm$|so$|_num$|_pct$|_txt$")) 
 
 
