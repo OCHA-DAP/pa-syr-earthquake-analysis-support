@@ -63,23 +63,22 @@
      group_by(admin_1_so,admin_2_so,admin_3_so,shelter_name_txt) %>%
      slice(1) %>% 
      ungroup() %>% 
-     pivot_longer(-c("admin_1_so","admin_2_so","admin_3_so","shelter_name_txt")) %>% 
+     select(-all_of(c("admin_1_so","admin_2_so","admin_3_so","shelter_name_txt"))) %>% 
+     pivot_longer(cols = everything()) %>% 
      filter(!is.na(value)) %>% 
-     group_by(admin_1_so,admin_2_so,admin_3_so,name) %>%
      mutate(
          value= fct_expand(as_factor(value),c("1","0"))
      ) %>% 
-     group_by(value,.add=T) %>% 
+     group_by(name,value) %>% 
      summarise(
-         n=n()
+         n=n(),.groups = "drop_last"
      ) %>% 
-     arrange(admin_1_so,admin_2_so, admin_3_so,name,value) %>% 
-     group_by(admin_1_so,admin_2_so,admin_3_so,name) %>% 
+     group_by(name) %>% 
      mutate(
          pct=n/sum(n)
      ) %>% 
      ungroup() %>% 
-     arrange(admin_1_so,admin_2_so, admin_3_so,name,value) %>% 
+     arrange(name,value) %>% 
      mutate(
          type="select_multiple"
      )
@@ -96,17 +95,18 @@
      group_by(admin_1_so,admin_2_so,admin_3_so,shelter_name_txt) %>%
      slice(1) %>% 
      ungroup() %>% 
-     pivot_longer(-c("admin_1_so","admin_2_so","admin_3_so","shelter_name_txt")) %>% 
+      select(-all_of(c("admin_1_so","admin_2_so","admin_3_so","shelter_name_txt"))) %>% 
+      pivot_longer(cols = everything()) %>% 
      filter(!is.na(value)) %>% 
-     group_by(admin_1_so,admin_2_so,admin_3_so,name) %>%
+     group_by(name) %>%
      summarise(
-         value=mean(value, na.rm=T)
+         mean=mean(value, na.rm=T),
+         median= median(value,na.rm=T),
+         sum = sum(value,na.rm=T)
      ) %>% 
-     arrange(admin_1_so,admin_2_so, admin_3_so,name,value) %>% 
+     arrange(name) %>% 
       mutate(type="numeric mean")
      
-  adm3_num_analyzed_na_rm %>% 
-      print(n=nrow(.))
   
   
   # total number of people who have recieved assistance
