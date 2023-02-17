@@ -8,6 +8,6 @@ data/*
 *xlsx
 *.csv
 
-gl_auth_client.json
+.gl_auth_client.json
 .Rproj.user
 .Renviron

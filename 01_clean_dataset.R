@@ -130,5 +130,6 @@ write_excel_csv(
         Sys.getenv("SYR_EQUAKE_DIR"),
         "clean_data",
         output_fn
-    ) 
+    ),
+    na = ""
 )
