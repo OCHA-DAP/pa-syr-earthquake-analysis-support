@@ -19,48 +19,6 @@
      glimpse()
  
  
- dat_labelled %>% 
-     glimpse()
- dat_labelled_hh_estimate <- dat_labelled%>% 
-     mutate(
-         max_hh_num= as.numeric(max_hh_txt),.after=max_hh_txt
-         )
- 
- 
- indiv_demo_nums <- c("total_infants_0_6_mo_num",
-                        "total_ealy_childhood_1_4_num",
-                        "total_children_3_6_num",
-                        "total_children_17_18_num",
-                        "total_adults_19_16_num",
-                        "total_elders_60_num")
- dat_labelled_hh_estimate <- dat_labelled_hh_estimate %>% 
-     mutate(
-         hh_best_estimate_num = case_when(
-             !is.na(likely_hh_num)~likely_hh_num,
-             !is.na(min_hh_num) & !is.na(max_hh_num)~ ceiling(rowMeans(dat_labelled_hh_estimate[, c("min_hh_num", "max_hh_num")], na.rm = TRUE)),
-             TRUE ~NA_real_
-             
-         ),.after=max_hh_num,
-         
-     ) %>% 
-     # select(-all_of(c("max_hh_num", "min_hh_num","likely_hh_num","max_hh_txt")))  %>% 
-     mutate(
-         mutate(
-             across(indiv_demo_nums,~as.numeric(.x))) %>% select(indiv_demo_nums)
-     )
- 
- # install.packages("openxlsx")
- dat_labelled_hh_estimate %>% 
-     mutate(
-        total_indiv= rowSums(dat_labelled_hh_estimate[,indiv_demo_nums],na.rm=T),
-        .after=total_elders_60_num
-    ) %>% select(-contains("address")) %>% 
-     openxlsx::write.xlsx("syr_equake_assessment_data_clean_202230217.xlsx",na="")
- 
-ceiling(1.5)
-
- 
-  
  
  
  
