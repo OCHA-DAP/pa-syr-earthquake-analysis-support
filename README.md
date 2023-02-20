@@ -11,7 +11,9 @@ The first part of the script simply pulls the data into a more usable format.
 ### Name cleaning
 
 A conversion dictionary of XLSForm names is defined in Google Sheets
-that converts the raw XML names into cleaner versions of themselves.
+that converts the raw XML names into cleaner versions of themselves. In case
+the file is exported with group names in the file names, these are removed
+as well.
 
 ### Translation
 

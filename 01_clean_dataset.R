@@ -10,14 +10,25 @@ ks <- read_sheet(ss = Sys.getenv("SYR_EQUAKE_GS_URL"),sheet = "survey")
 dat_fp <- file.path(
     Sys.getenv("SYR_EQUAKE_DIR"),
     "kobo_data_incoming",
-    "Syria_earthquake_-_shelters_multi-sectoral_assessment_-_latest_version_-_False_-_2023-02-17-07-19-17.xlsx"
-) 
+    "Syria_earthquake_-_shelters_multi-sectoral_assessment_-_latest_version_-_False_-_2023-02-20-16-00-44.xlsx"
+)
 
 dat <- read_excel(dat_fp)
 
 ##########################
 #### CLEANING COLUMNS ####
 ##########################
+
+# get group names for removal
+group_names <- ks %>%
+    filter(
+        type == "begin_group"
+    ) %>%
+    pull(
+        name
+    ) %>%
+    unique() %>%
+    paste0("/", collapse = "|")
 
 # get names for conversion
 
@@ -34,6 +45,9 @@ names(reps) <- ks_names$name
 # simply pivot all data longer and use str_replace_all to rename vectors
 # then re-pivot everything to wide data and re-convert
 df_clean <- dat %>%
+    rename_with(
+        .fn = ~ str_remove_all(.x, group_names)
+    ) %>%
     mutate(
         id = row_number(),
         across(
