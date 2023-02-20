@@ -7,3 +7,7 @@ data/*
 **/.DS_Store
 *xlsx
 *.csv
+
+.gl_auth_client.json
+.Rproj.user
+.Renviron
