@@ -23,7 +23,7 @@ dat <- read_excel(dat_fp)
 
 ks_names <- ks %>%
     filter(
-        !is.na(name_new),
+        !is.na(name_new) & !is.na(name),
         !str_detect(name_new, "eng$")
     )
 
