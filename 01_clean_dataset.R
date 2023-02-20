@@ -5,15 +5,29 @@ library(googlesheets4)
 library(glue)
 library(googleLanguageR)
 
+###################
+#### LOAD DATA ####
+###################
+
 ks <- read_sheet(ss = Sys.getenv("SYR_EQUAKE_GS_URL"),sheet = "survey")
 
-dat_fp <- file.path(
-    Sys.getenv("SYR_EQUAKE_DIR"),
-    "kobo_data_incoming",
-    "Syria_earthquake_-_shelters_multi-sectoral_assessment_-_latest_version_-_False_-_2023-02-20-16-00-44.xlsx"
-)
+# auto-detect the latest file name
+data_files <- list.files(
+    file.path(
+        Sys.getenv("SYR_EQUAKE_DIR"),
+        "kobo_data_incoming"
+    ),
+    full.names = TRUE
+) 
 
-dat <- read_excel(dat_fp)
+latest_index <- data_files %>%
+    str_extract(
+        "2023(.*)(?=.xlsx)"
+    ) %>%
+    lubridate::as_datetime() %>%
+    which.max()
+
+dat <- read_excel(data_files[latest_index])
 
 ##########################
 #### CLEANING COLUMNS ####
